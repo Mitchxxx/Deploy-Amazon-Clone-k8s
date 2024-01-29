@@ -6,7 +6,7 @@ pipeline {
     environment {
         APP_NAME = "mitchxxx/amazon"
         SCANNER_HOME = tool 'ibt-sonarqube'
-        DOCKERHUB_CREDENTIALS = credentials('docker-hub-Mitchel')
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub-Mitchel')
     }
     stages{
         stage('SCM Checkout'){
@@ -21,9 +21,9 @@ pipeline {
                 }
             }
         }
-        stage('Login to Docker'){
+        stage('Login to Docker') {
             steps {
-                script{
+                script {
                     withCredentials([usernamePassword(credentialsId: DOCKERHUB_CREDENTIALS, passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
                         sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
                     }
@@ -31,7 +31,7 @@ pipeline {
             }
         }
         stage('Build docker image'){
-            steps {  
+            steps {
                 sh 'docker build -t $APP_NAME:$BUILD_NUMBER .'
             }
         }
