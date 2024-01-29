@@ -21,13 +21,14 @@ pipeline {
                 }
             }
         }
+        stage('Login to Docker'){
+            steps {
+                sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKER_CREDENTIALS_USR --passwd-stdin'
+            }
+        }
         stage('Build docker image'){
-            steps{
-                script {
-                    docker.withRegistry('', DOCKERHUB_CREDENTIALS){
-                        docker_image = docker build "$APP_NAME:$BUILD_NUMBER"
-                    }
-                }
+            steps {  
+                sh 'docker build -t $APP_NAME:$BUILD_NUMBER .'
             }
         }
         stage('Image Scan'){
@@ -37,11 +38,7 @@ pipeline {
         }
         stage('Push docker image'){
             steps{
-                script {
-                    docker.withRegistry('', DOCKERHUB_CREDENTIALS){
-                        docker_image.push("$APP_NAME:$BUILD_NUMBER")
-                    }
-                }
+                sh 'docker push $APP_NAME:$BUILD_NUMBER'
             }
         }
     }
