@@ -45,6 +45,11 @@ pipeline {
                 sh 'docker push $APP_NAME:$BUILD_NUMBER'
             }
         }
+        stage('Trigger ManifestUpdate'){
+            steps{
+                build job: 'E2E-GitOps-AmazonClone', parameters: [string(name: 'DOCKERTAG', value: env.BUILD_NUMBER)]
+            }
+        }
     }
     post {
         always {
