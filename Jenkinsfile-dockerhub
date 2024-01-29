@@ -1,0 +1,53 @@
+pipeline {
+    agent any
+    options {
+        timeout(time: 5, unit: 'MINUTES0')
+    }
+    environment {
+        DOCKERHUB_CREDENTIALS = credentials('docker-hub-Mitchel')
+        APP_NAME = "mitchxxx/amazon"
+        SCANNER_HOME = tool 'ibt-sonarqube'
+    }
+    stages{
+        stage('SCM Checkout'){
+            steps{
+                git branch: 'main', url: 'https://github.com/Mitchxxx/Deploy-Amazon-Clone-k8s.git'
+            }
+        }
+        stage('Run Sonarqube'){
+            steps{
+                withSonarQubeEnv(credentialsId: 'ibt-sonar', installationName: 'IBT sonarqube'){
+                    sh "${SCANNER_HOME}/bin/sonar-scanner"
+                }
+            }
+        }
+        stage('Build docker image'){
+            steps{
+                script {
+                    docker.withRegistry('', DOCKERHUB_CREDENTIALS){
+                        docker_image = docker build "$APP_NAME:$BUILD_NUMBER"
+                    }
+                }
+            }
+        }
+        stage('Image Scan'){
+            steps {
+                sh 'trivy image $APP_NAME:$BUILD_NUMBER --no-progress --scanners vuln --exit-code 0 --severity HIGH,CRITICAL --format table > trivyImage.txt'
+            }
+        }
+        stage('Push docker image'){
+            steps{
+                script {
+                    docker.withRegistry('', DOCKERHUB_CREDENTIALS){
+                        docker_image.push("$APP_NAME:$BUILD_NUMBER")
+                    }
+                }
+            }
+        }
+    }
+    post {
+        always {
+            
+        }
+    }
+}
