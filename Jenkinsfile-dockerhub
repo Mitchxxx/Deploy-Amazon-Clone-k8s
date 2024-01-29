@@ -6,7 +6,7 @@ pipeline {
     environment {
         APP_NAME = "mitchxxx/amazon"
         SCANNER_HOME = tool 'ibt-sonarqube'
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-Mitchel')
+        DOCKERHUB_CREDENTIALS = 'dockerhub-Mitchel'
     }
     stages{
         stage('SCM Checkout'){
